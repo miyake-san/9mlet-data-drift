@@ -1,0 +1,82 @@
+services:
+  drift-exporter:
+    build:
+      context: ..
+      dockerfile: monitoring_stack/app/Dockerfile
+    image: aula6/drift-exporter:latest
+    container_name: aula6-drift-exporter
+    restart: unless-stopped
+    environment:
+      # Tempo (segundos) entre coletas de métricas
+      SCRAPE_INTERVAL_SECONDS: "10"
+      # Quantidade de iterações em cada fase antes de alternar (pre/pos drift)
+      ITERATIONS_PER_PHASE: "12"
+      # Tamanho de cada lote (batch) de produção simulado
+      BATCH_SIZE: "500"
+      # Porta onde o exporter publica /metrics
+      EXPORTER_PORT: "8000"
+      # SLOs (mesmos valores default do SLOMonitor)
+      ACCURACY_SLO: "0.85"
+      DRIFT_P_VALUE_THRESHOLD: "0.05"
+      MISSING_RATE_SLO: "0.01"
+      PSI_THRESHOLD: "0.25"
+      PYTHONUNBUFFERED: "1"
+    ports:
+      - "8000:8000"
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8000/metrics"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: aula6-prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=2h"
+      - "--web.enable-lifecycle"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - drift-exporter
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: aula6-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/ml_monitoring_dashboard.json
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:
