@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: "Aula 6 - ML Monitoring"
+    orgId: 1
+    folder: "Aula 6"
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 15
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

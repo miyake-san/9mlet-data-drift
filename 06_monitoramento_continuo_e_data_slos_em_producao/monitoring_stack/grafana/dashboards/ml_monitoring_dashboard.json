@@ -1,0 +1,263 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Fase Atual da Simulação",
+      "id": 1,
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "orientation": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "PRE-DRIFT", "color": "green" } } },
+            { "type": "value", "options": { "1": { "text": "POS-DRIFT", "color": "red"  } } }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "red",   "value": 1 }
+          ] }
+        }
+      },
+      "targets": [
+        { "expr": "ml_phase", "refId": "A", "legendFormat": "Fase" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Status Geral",
+      "id": 2,
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background", "graphMode": "none",
+        "textMode": "value_and_name", "orientation": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "CRITICAL", "color": "red"   } } },
+            { "type": "value", "options": { "1": { "text": "HEALTHY",  "color": "green" } } }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red",   "value": null },
+            { "color": "green", "value": 1 }
+          ] }
+        }
+      },
+      "targets": [
+        { "expr": "ml_overall_status", "refId": "A", "legendFormat": "Status" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Checks Aprovados / Reprovados",
+      "id": 3,
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "value", "graphMode": "area",
+        "textMode": "value_and_name", "orientation": "horizontal"
+      },
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [
+        { "color": "green", "value": null }, { "color": "red", "value": 1 }
+      ] } } },
+      "targets": [
+        { "expr": "ml_slo_checks_passed", "refId": "A", "legendFormat": "Passou" },
+        { "expr": "ml_slo_checks_failed", "refId": "B", "legendFormat": "Falhou" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Alertas Acumulados (todos os checks)",
+      "id": 4,
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "value", "graphMode": "area", "textMode": "auto"
+      },
+      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [
+        { "color": "green", "value": null }, { "color": "orange", "value": 1 }, { "color": "red", "value": 50 }
+      ] } } },
+      "targets": [
+        { "expr": "sum(ml_slo_alerts_total)", "refId": "A", "legendFormat": "alertas" }
+      ]
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Acurácia do Modelo vs SLO",
+      "id": 10,
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0, "max": 1,
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth", "lineWidth": 2, "fillOpacity": 15 }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "SLO" }, "properties": [
+            { "id": "custom.lineStyle", "value": { "fill": "dash" } },
+            { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }
+          ] }
+        ]
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "lastNotNull", "min"] } },
+      "targets": [
+        { "expr": "ml_model_accuracy", "refId": "A", "legendFormat": "Acurácia" },
+        { "expr": "ml_slo_accuracy_threshold", "refId": "B", "legendFormat": "SLO" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Brier Score (calibração — menor é melhor)",
+      "id": 11,
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": {
+        "unit": "none",
+        "custom": { "drawStyle": "line", "lineInterpolation": "smooth", "lineWidth": 2, "fillOpacity": 15 }
+      } },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "lastNotNull"] } },
+      "targets": [
+        { "expr": "ml_model_brier_score", "refId": "A", "legendFormat": "Brier" }
+      ]
+    },
+
+    {
+      "type": "timeseries",
+      "title": "PSI por Feature (>0.25 = drift severo)",
+      "id": 20,
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": {
+        "unit": "none", "min": 0,
+        "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10 },
+        "thresholds": { "mode": "absolute", "steps": [
+          { "color": "green",  "value": null },
+          { "color": "orange", "value": 0.10 },
+          { "color": "red",    "value": 0.25 }
+        ] }
+      } },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] } },
+      "targets": [
+        { "expr": "ml_drift_psi", "refId": "A", "legendFormat": "{{feature}}" },
+        { "expr": "ml_slo_psi_threshold", "refId": "B", "legendFormat": "threshold" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "p-valor KS por Feature (< threshold => drift)",
+      "id": 21,
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": {
+        "unit": "none", "min": 0, "max": 1,
+        "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10 }
+      } },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "min", "lastNotNull"] } },
+      "targets": [
+        { "expr": "ml_drift_ks_pvalue", "refId": "A", "legendFormat": "{{feature}}" },
+        { "expr": "ml_slo_drift_pvalue_threshold", "refId": "B", "legendFormat": "threshold" }
+      ]
+    },
+
+    {
+      "type": "heatmap",
+      "title": "Status dos Checks de SLO (1=OK, 0=violou)",
+      "id": 30,
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 21 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "ml_slo_check_status", "refId": "A", "legendFormat": "{{check}}", "format": "time_series" }
+      ],
+      "options": {
+        "calculate": false,
+        "cellGap": 2,
+        "color": { "mode": "scheme", "scheme": "RdYlGn", "steps": 8, "min": 0, "max": 1 },
+        "yAxis": { "axisLabel": "check" },
+        "showValue": "auto"
+      }
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Taxa de Missings por Feature vs SLO",
+      "id": 40,
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": {
+        "unit": "percentunit", "min": 0,
+        "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15 }
+      } },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] } },
+      "targets": [
+        { "expr": "ml_data_missing_rate", "refId": "A", "legendFormat": "{{feature}}" },
+        { "expr": "ml_slo_missing_rate_threshold", "refId": "B", "legendFormat": "SLO" }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "Alertas por tipo de check (acumulado)",
+      "id": 41,
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 30 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true,
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "fieldConfig": { "defaults": {
+        "thresholds": { "mode": "absolute", "steps": [
+          { "color": "green",  "value": null },
+          { "color": "orange", "value": 1 },
+          { "color": "red",    "value": 10 }
+        ] }
+      } },
+      "targets": [
+        { "expr": "ml_slo_alerts_total", "refId": "A", "legendFormat": "{{check}}" }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": ["aula6", "drift", "ml-monitoring"],
+  "templating": { "list": [] },
+  "time": { "from": "now-15m", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Aula 6 — ML Monitoring (Pre/Pos Drift)",
+  "uid": "aula6-ml-monitoring",
+  "version": 1,
+  "weekStart": ""
+}
