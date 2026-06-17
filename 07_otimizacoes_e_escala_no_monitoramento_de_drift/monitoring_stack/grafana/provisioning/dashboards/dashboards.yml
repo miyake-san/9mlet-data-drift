@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: "Aula 7 - Drift Streaming"
+    orgId: 1
+    folder: "Aula 7"
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 15
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

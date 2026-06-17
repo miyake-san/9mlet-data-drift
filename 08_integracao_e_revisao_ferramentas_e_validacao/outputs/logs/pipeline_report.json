@@ -1,0 +1,70 @@
+{
+  "timestamp": "2026-06-16T19:06:23.583665",
+  "metrics": {
+    "timestamp": "2026-06-16T19:06:23.578352",
+    "pipeline_version": "1.0",
+    "data_quality": {
+      "validations_passed": true,
+      "checks": [
+        {
+          "name": "transaction_id_not_null",
+          "passed": true
+        },
+        {
+          "name": "valor_transacao_range",
+          "passed": true
+        },
+        {
+          "name": "tempo_conta_media",
+          "passed": true
+        },
+        {
+          "name": "schema_complete",
+          "passed": true
+        }
+      ],
+      "n_reference": 5000,
+      "n_production": 5000
+    },
+    "drift_analysis": {
+      "n_features_total": 10,
+      "n_features_drifted": 9,
+      "features_drifted": [
+        "valor_transacao",
+        "tempo_conta_cliente",
+        "num_transacoes_24h",
+        "valor_medio_historico",
+        "distancia_localizacao",
+        "hora_transacao",
+        "score_risco_dispositivo",
+        "tentativas_senha",
+        "razao_valor_medio"
+      ],
+      "threshold_features": 3,
+      "retrain_triggered": true
+    },
+    "model_performance": {
+      "v1_validation": {
+        "accuracy": 0.966,
+        "precision": 0.7857142857142857,
+        "recall": 0.44,
+        "f1": 0.5641025641025641,
+        "roc_auc": 0.980821052631579
+      },
+      "v1_production": {
+        "accuracy": 0.8286,
+        "precision": 0.21894218942189422,
+        "recall": 0.445,
+        "f1": 0.29348722176422093,
+        "roc_auc": 0.8103407608695653
+      },
+      "v2_production": {
+        "accuracy": 0.9788,
+        "precision": 0.7905138339920948,
+        "recall": 1.0,
+        "f1": 0.8830022075055187,
+        "roc_auc": 0.9999641304347825
+      }
+    }
+  }
+}

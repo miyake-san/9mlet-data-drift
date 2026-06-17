@@ -1,0 +1,19 @@
+{
+  "train_features": [
+    "amount",
+    "num_items",
+    "hour_of_day",
+    "day_of_week",
+    "customer_age",
+    "account_age_days",
+    "transaction_count_30d",
+    "avg_amount_30d",
+    "is_international",
+    "channel_app",
+    "channel_phone",
+    "channel_physical",
+    "channel_web"
+  ],
+  "n_train": 3750,
+  "saved_at": "2026-06-09T16:37:16.676152"
+}

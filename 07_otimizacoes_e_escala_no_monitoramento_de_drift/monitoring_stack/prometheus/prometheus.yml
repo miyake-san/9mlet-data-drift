@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+  external_labels:
+    monitor: "aula7-drift-streaming"
+
+scrape_configs:
+  - job_name: "drift-consumer"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["drift-consumer:8000"]
+        labels:
+          service: "finbank-drift-monitor"
+          aula: "07"
+          architecture: "kappa"
+
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]

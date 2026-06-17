@@ -220,6 +220,8 @@ def _make_json_serializable(obj: Any) -> Any:
         return {k: _make_json_serializable(v) for k, v in obj.items()}
     if isinstance(obj, (list, tuple)):
         return [_make_json_serializable(v) for v in obj]
+    if isinstance(obj, np.bool_):
+        return bool(obj)
     if isinstance(obj, (np.integer,)):
         return int(obj)
     if isinstance(obj, (np.floating,)):

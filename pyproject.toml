@@ -13,6 +13,9 @@ dependencies = [
     "joblib>=1.3.0",
     "jupyterlab>=4.2.0",
     "ipykernel>=6.29.0",
+    "evidently>=0.7.21",
+    "nannyml>=0.13.1",
+    "great-expectations>=1.15.1",
 ]
 
 [project.optional-dependencies]
@@ -33,6 +36,13 @@ extras = [
     "nltk>=3.9.0",
     "kafka-python>=2.0.2",
 ]
+
+[tool.uv]
+# nannyml depende de `kaleido` sem limite superior, e o resolver acaba
+# escolhendo `kaleido==0.2.1.post1`, um release quebrado que só publicou
+# wheel para Linux ARM (manylinux2014_armv7l) — sem wheel para Windows.
+# Forçamos o `kaleido==0.2.1`, que tem wheel `win_amd64` (e demais plataformas).
+override-dependencies = ["kaleido==0.2.1"]
 
 [build-system]
 requires = ["hatchling"]

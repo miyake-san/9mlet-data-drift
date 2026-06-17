@@ -1,0 +1,25 @@
+============================================================
+RELATÓRIO DE DETECÇÃO DE DRIFT EM EMBEDDINGS
+============================================================
+
+--- MMD ---
+  Score:           0.020695
+  P-value:         0.009901
+  Drift Detectado: SIM
+
+--- KS ---
+  Score:           0.683000
+  P-value:         0.000000
+  Drift Detectado: SIM
+
+--- ADVERSARIAL ---
+  Score:           0.711113
+  Accuracy:        0.8556
+  Drift Detectado: SIM
+
+--- ESTATÍSTICAS DE EMBEDDINGS ---
+  Norma média (ref):   5.6765
+  Norma média (prod):  6.7607
+  Similaridade cosseno: 0.3444
+
+============================================================

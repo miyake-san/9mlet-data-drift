@@ -1,0 +1,152 @@
+services:
+  # ------------------------------------------------------------------
+  # Message broker (Redis Streams) — camada de ingestão da arquitetura Kappa.
+  # ------------------------------------------------------------------
+  redis:
+    image: redis:7.4-alpine
+    container_name: aula7-redis
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ------------------------------------------------------------------
+  # Producer — gera transações FinBank de forma aleatória, alternando
+  # entre períodos SEM drift (baseline) e COM drift (gradual/abrupto).
+  # ------------------------------------------------------------------
+  producer:
+    build:
+      context: ..
+      dockerfile: monitoring_stack/app/Dockerfile
+    image: aula7/finbank-stream:latest
+    container_name: aula7-producer
+    restart: unless-stopped
+    command: ["python", "/app/producer.py"]
+    environment:
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+      STREAM_KEY: "finbank:transactions"
+      STREAM_MAXLEN: "50000"
+      # Intervalo entre lotes publicados (segundos)
+      PRODUCE_INTERVAL_SECONDS: "2"
+      # Tamanho de cada lote de transações
+      BATCH_SIZE: "200"
+      # Probabilidade de troca de regime (sem drift <-> com drift) a cada lote
+      REGIME_SWITCH_PROB: "0.15"
+      SEED: "2025"
+      PYTHONUNBUFFERED: "1"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - monitoring
+
+  # ------------------------------------------------------------------
+  # Drift consumer / exporter — consome o stream em janela deslizante,
+  # avalia drift (PSI/KS/Wasserstein) e expõe métricas em /metrics.
+  # ------------------------------------------------------------------
+  drift-consumer:
+    build:
+      context: ..
+      dockerfile: monitoring_stack/app/Dockerfile
+    image: aula7/finbank-stream:latest
+    container_name: aula7-drift-consumer
+    restart: unless-stopped
+    command: ["python", "/app/drift_consumer.py"]
+    environment:
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+      STREAM_KEY: "finbank:transactions"
+      CONSUMER_GROUP: "drift-monitors"
+      CONSUMER_NAME: "exporter-1"
+      # Tamanho da janela deslizante (transações)
+      WINDOW_SIZE: "2000"
+      # Tamanho da amostra de referência (baseline estável)
+      BASELINE_SIZE: "5000"
+      # Intervalo entre avaliações de drift (segundos)
+      SCRAPE_INTERVAL_SECONDS: "5"
+      EXPORTER_PORT: "8000"
+      # Thresholds de drift (mesmos defaults do DriftMonitor da Aula 7)
+      PSI_THRESHOLD: "0.25"
+      PSI_WARNING: "0.10"
+      KS_ALPHA: "0.05"
+      SEED: "2025"
+      PYTHONUNBUFFERED: "1"
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      producer:
+        condition: service_started
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8000/metrics"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ------------------------------------------------------------------
+  # Prometheus — coleta as métricas de drift do consumer.
+  # ------------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: aula7-prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=2h"
+      - "--web.enable-lifecycle"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - drift-consumer
+    networks:
+      - monitoring
+
+  # ------------------------------------------------------------------
+  # Grafana — dashboard de drift em streaming (provisionado).
+  # ------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: aula7-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/drift_streaming_dashboard.json
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:

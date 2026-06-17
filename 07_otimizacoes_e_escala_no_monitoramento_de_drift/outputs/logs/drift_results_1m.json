@@ -1,0 +1,77 @@
+{
+  "pipeline": "sliding_window_1m",
+  "n_windows": 5,
+  "results": [
+    {
+      "window_months": [
+        4
+      ],
+      "aggregate_score": {
+        "mean_psi": 0.2695435007472839,
+        "max_psi": 1.8307992621571905,
+        "drift_fraction": 0.625,
+        "n_features_with_drift": 5,
+        "n_features_total": 8
+      },
+      "alert_level": "CRITICAL",
+      "should_retrain": true
+    },
+    {
+      "window_months": [
+        5
+      ],
+      "aggregate_score": {
+        "mean_psi": 1.1400345217505137,
+        "max_psi": 7.893451736872957,
+        "drift_fraction": 0.625,
+        "n_features_with_drift": 5,
+        "n_features_total": 8
+      },
+      "alert_level": "CRITICAL",
+      "should_retrain": true
+    },
+    {
+      "window_months": [
+        6
+      ],
+      "aggregate_score": {
+        "mean_psi": 1.7773878623540666,
+        "max_psi": 11.718705123833342,
+        "drift_fraction": 0.625,
+        "n_features_with_drift": 5,
+        "n_features_total": 8
+      },
+      "alert_level": "CRITICAL",
+      "should_retrain": true
+    },
+    {
+      "window_months": [
+        7
+      ],
+      "aggregate_score": {
+        "mean_psi": NaN,
+        "max_psi": NaN,
+        "drift_fraction": 0.75,
+        "n_features_with_drift": 6,
+        "n_features_total": 8
+      },
+      "alert_level": "CRITICAL",
+      "should_retrain": true
+    },
+    {
+      "window_months": [
+        8
+      ],
+      "aggregate_score": {
+        "mean_psi": NaN,
+        "max_psi": NaN,
+        "drift_fraction": 0.75,
+        "n_features_with_drift": 6,
+        "n_features_total": 8
+      },
+      "alert_level": "CRITICAL",
+      "should_retrain": true
+    }
+  ],
+  "saved_at": "2026-06-09T16:37:16.708844"
+}

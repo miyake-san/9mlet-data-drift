@@ -1,0 +1,57 @@
+{
+  "pipeline_config": {
+    "window_size": 1,
+    "baseline_months": [
+      1,
+      2,
+      3
+    ],
+    "psi_threshold": 0.25,
+    "psi_warning": 0.1,
+    "ks_alpha": 0.05
+  },
+  "monitoring_summary": {
+    "n_windows": 5,
+    "critical_windows": 5,
+    "warning_windows": 0,
+    "ok_windows": 0,
+    "critical_rate": 1.0,
+    "mean_psi_overall": NaN,
+    "max_psi_overall": NaN
+  },
+  "detection_quality": {
+    "true_positives": 5,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0
+  },
+  "retraining_events": [
+    [
+      5
+    ],
+    [
+      6
+    ],
+    [
+      7
+    ],
+    [
+      8
+    ]
+  ],
+  "model_comparison": {
+    "original": {
+      "f1": 0.034129692832764506,
+      "precision": 0.054945054945054944,
+      "recall": 0.024752475247524754
+    },
+    "retrained": {
+      "f1": 0.026490066225165563,
+      "precision": 0.04,
+      "recall": 0.019801980198019802
+    }
+  },
+  "saved_at": "2026-06-09T16:54:23.062875"
+}

@@ -1,0 +1,44 @@
+{
+  "strategies": {
+    "Baseline (P1)": {
+      "accuracy": 0.803,
+      "f1": 0.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "auc_roc": 0.6543
+    },
+    "Re-treinado (P2)": {
+      "accuracy": 0.7863,
+      "f1": 0.2057,
+      "precision": 0.3843,
+      "recall": 0.1404,
+      "auc_roc": 0.6719
+    },
+    "Baseline + Limiar": {
+      "accuracy": 0.2643,
+      "f1": 0.3465,
+      "precision": 0.21,
+      "recall": 0.9898,
+      "auc_roc": 0.6543
+    }
+  },
+  "cost_analysis": {
+    "symmetric": {
+      "optimal_threshold": 0.3806905807976999,
+      "min_cost": 0.196,
+      "tpr_at_optimal": 0.00676818950930626,
+      "fpr_at_optimal": 0.00041511000415110004,
+      "cost_fn": 1.0,
+      "cost_fp": 1.0
+    },
+    "asymmetric_churn": {
+      "optimal_threshold": 0.048103150523719336,
+      "min_cost": 0.7536666666666666,
+      "tpr_at_optimal": 0.9898477157360406,
+      "fpr_at_optimal": 0.9136571191365712,
+      "cost_fn": 10.0,
+      "cost_fp": 1.0
+    }
+  },
+  "online_model_accuracy": 0.7991
+}

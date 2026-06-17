@@ -393,21 +393,40 @@ class DriftDetector:
     Args:
         psi_threshold: Limiar para PSI. Default: 0.25.
         mmd_gamma: Parâmetro γ do kernel RBF. None = auto.
+        alpha: Nível de significância para calibração das métricas
+            multivariadas (default 0.05 → threshold = quantil 95% sob H₀).
+        n_bootstrap: Número de reamostragens bootstrap para calibrar
+            os thresholds de MMD, Wasserstein e Energy Distance.
+        random_state: Semente para reprodutibilidade da calibração.
     """
 
     def __init__(
         self,
         psi_threshold: float = 0.25,
         mmd_gamma: Optional[float] = None,
+        alpha: float = 0.05,
+        n_bootstrap: int = 100,
+        random_state: int = 42,
     ) -> None:
         self.psi_threshold = psi_threshold
+        self.alpha = alpha
+        self.n_bootstrap = n_bootstrap
+        self.random_state = random_state
         self.psi_calc = PSICalculator()
         self.mmd_calc = MMDCalculator(gamma=mmd_gamma)
         self.wasserstein_calc = WassersteinCalculator()
         self.energy_calc = EnergyDistanceCalculator()
+        self.mmd_threshold_: Optional[float] = None
+        self.wasserstein_threshold_: Optional[float] = None
+        self.energy_threshold_: Optional[float] = None
 
     def fit(self, reference: np.ndarray) -> "DriftDetector":
-        """Armazena dados de referência.
+        """Armazena dados de referência e calibra thresholds.
+
+        Além de armazenar a referência, calibra os limiares de
+        MMD, Wasserstein e Energy Distance via bootstrap sob H₀
+        (ausência de drift), conforme prática recomendada em
+        Gretton et al. (2012) e Documento 04, Seção "Saiba Mais".
 
         Args:
             reference: Dados do período de referência.
@@ -418,7 +437,43 @@ class DriftDetector:
         self.reference_ = np.asarray(reference, dtype=np.float64)
         if self.reference_.ndim == 1:
             self.reference_ = self.reference_.reshape(-1, 1)
+        self._calibrate_thresholds()
         return self
+
+    def _calibrate_thresholds(self) -> None:
+        """Calibra thresholds para MMD, Wasserstein e Energy via bootstrap.
+
+        Sob H₀ (sem drift), divide a referência em duas metades aleatórias
+        e calcula cada estatística; repete ``n_bootstrap`` vezes para obter
+        a distribuição sob H₀ e usa o quantil ``1 - alpha`` como limiar.
+        Conforme Documento 04, Seção "Saiba Mais" — sem calibração não há
+        veredicto estatístico para métricas contínuas.
+        """
+        rng = np.random.RandomState(self.random_state)
+        n = len(self.reference_)
+        half = n // 2
+        if half < 2:
+            # Amostra muito pequena: deixa thresholds em None (sem decisão).
+            return
+
+        mmd_null: List[float] = []
+        wass_null: List[float] = []
+        energy_null: List[float] = []
+
+        for _ in range(self.n_bootstrap):
+            idx = rng.permutation(n)
+            A = self.reference_[idx[:half]]
+            B = self.reference_[idx[half : 2 * half]]
+            mmd_null.append(self.mmd_calc.calculate(A, B))
+            wass_null.append(
+                float(np.mean(self.wasserstein_calc.calculate_multifeature(A, B)))
+            )
+            energy_null.append(self.energy_calc.calculate(A, B))
+
+        q = 100.0 * (1.0 - self.alpha)
+        self.mmd_threshold_ = float(np.percentile(mmd_null, q))
+        self.wasserstein_threshold_ = float(np.percentile(wass_null, q))
+        self.energy_threshold_ = float(np.percentile(energy_null, q))
 
     def predict(self, current: np.ndarray) -> Dict[str, DriftResult]:
         """Executa detecção de drift com todas as métricas.
@@ -457,18 +512,35 @@ class DriftDetector:
         results["mmd"] = DriftResult(
             metric_name="MMD",
             statistic=mmd_val,
-            drift_detected=False,  # Needs permutation test for p-value
-            details={"note": "Use permutation_test() para p-valor"},
+            threshold=self.mmd_threshold_,
+            drift_detected=(
+                self.mmd_threshold_ is not None
+                and mmd_val > self.mmd_threshold_
+            ),
+            details={
+                "alpha": self.alpha,
+                "n_bootstrap": self.n_bootstrap,
+                "note": (
+                    "Threshold calibrado via bootstrap sob H₀. "
+                    "Para p-valor exato, use MMDCalculator.permutation_test()."
+                ),
+            },
         )
 
         # Wasserstein — Documento 04, Saiba Mais
         wass_values = self.wasserstein_calc.calculate_multifeature(
             self.reference_, current
         )
+        wass_mean = float(np.mean(wass_values))
         results["wasserstein"] = DriftResult(
             metric_name="Wasserstein",
-            statistic=float(np.mean(wass_values)),
-            details={"per_feature": wass_values},
+            statistic=wass_mean,
+            threshold=self.wasserstein_threshold_,
+            drift_detected=(
+                self.wasserstein_threshold_ is not None
+                and wass_mean > self.wasserstein_threshold_
+            ),
+            details={"per_feature": wass_values, "alpha": self.alpha},
         )
 
         # Energy Distance — Documento 04, Saiba Mais (Székely e Rizzo, 2013)
@@ -476,7 +548,12 @@ class DriftDetector:
         results["energy"] = DriftResult(
             metric_name="Energy Distance",
             statistic=energy_val,
-            details={},
+            threshold=self.energy_threshold_,
+            drift_detected=(
+                self.energy_threshold_ is not None
+                and energy_val > self.energy_threshold_
+            ),
+            details={"alpha": self.alpha},
         )
 
         return results

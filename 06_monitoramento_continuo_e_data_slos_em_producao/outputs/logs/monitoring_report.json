@@ -1,0 +1,206 @@
+{
+  "status": "CRITICAL",
+  "metrics_reference": {
+    "accuracy": 0.994,
+    "precision": 0.9896907216494846,
+    "recall": 0.768,
+    "f1_score": 0.8648648648648649,
+    "roc_auc": 0.9300906666666667,
+    "brier_score": 0.006863180082130233
+  },
+  "metrics_production": {
+    "accuracy": 0.9316,
+    "precision": 0.13333333333333333,
+    "recall": 0.0125,
+    "f1_score": 0.022857142857142857,
+    "roc_auc": 0.6262126068376068,
+    "brier_score": 0.06540466921381285
+  },
+  "brier_reference": 0.006863180082130233,
+  "brier_production": 0.06540466921381285,
+  "error_budget_accuracy": 0.0816,
+  "total_checks": 23,
+  "passed_checks": 13,
+  "failed_checks": 10,
+  "alerts": [
+    "Drift KS em 'idade': statistic=0.2031, p-value=0.0000 — ALERTA: drift detectado (p < 0.05)",
+    "PSI de 'idade': 0.2599 — SEVERO (mudança significativa)",
+    "Drift KS em 'renda_mensal': statistic=0.0886, p-value=0.0000 — ALERTA: drift detectado (p < 0.05)",
+    "Drift KS em 'score_credito': statistic=0.1433, p-value=0.0000 — ALERTA: drift detectado (p < 0.05)",
+    "Drift KS em 'tempo_emprego': statistic=0.0291, p-value=0.0300 — ALERTA: drift detectado (p < 0.05)",
+    "Missing rate em 'idade': 1.90% > SLO de 1% — ALERTA: qualidade de dados abaixo do SLO!",
+    "Missing rate em 'renda_mensal': 1.88% > SLO de 1% — ALERTA: qualidade de dados abaixo do SLO!",
+    "Missing rate em 'score_credito': 1.90% > SLO de 1% — ALERTA: qualidade de dados abaixo do SLO!",
+    "Missing rate em 'tempo_emprego': 2.14% > SLO de 1% — ALERTA: qualidade de dados abaixo do SLO!",
+    "Missing rate em 'saldo_conta': 1.90% > SLO de 1% — ALERTA: qualidade de dados abaixo do SLO!"
+  ],
+  "report_detail": {
+    "overall_status": "CRITICAL",
+    "passed": 13,
+    "failed": 10,
+    "total": 23,
+    "checks": [
+      {
+        "name": "accuracy_slo",
+        "passed": true,
+        "metric_value": 0.9316,
+        "threshold": 0.85,
+        "message": "Acurácia 93.2% ≥ SLO de 85%"
+      },
+      {
+        "name": "drift_ks_idade",
+        "passed": false,
+        "metric_value": 0.0,
+        "threshold": 0.05,
+        "message": "Drift KS em 'idade': statistic=0.2031, p-value=0.0000 — ALERTA: drift detectado (p < 0.05)"
+      },
+      {
+        "name": "psi_idade",
+        "passed": false,
+        "metric_value": 0.2599,
+        "threshold": 0.25,
+        "message": "PSI de 'idade': 0.2599 — SEVERO (mudança significativa)"
+      },
+      {
+        "name": "drift_ks_renda_mensal",
+        "passed": false,
+        "metric_value": 0.0,
+        "threshold": 0.05,
+        "message": "Drift KS em 'renda_mensal': statistic=0.0886, p-value=0.0000 — ALERTA: drift detectado (p < 0.05)"
+      },
+      {
+        "name": "psi_renda_mensal",
+        "passed": true,
+        "metric_value": 0.0434,
+        "threshold": 0.25,
+        "message": "PSI de 'renda_mensal': 0.0434 — baixo (sem mudança significativa)"
+      },
+      {
+        "name": "drift_ks_score_credito",
+        "passed": false,
+        "metric_value": 0.0,
+        "threshold": 0.05,
+        "message": "Drift KS em 'score_credito': statistic=0.1433, p-value=0.0000 — ALERTA: drift detectado (p < 0.05)"
+      },
+      {
+        "name": "psi_score_credito",
+        "passed": true,
+        "metric_value": 0.111,
+        "threshold": 0.25,
+        "message": "PSI de 'score_credito': 0.1110 — moderado (mudança moderada)"
+      },
+      {
+        "name": "drift_ks_tempo_emprego",
+        "passed": false,
+        "metric_value": 0.03,
+        "threshold": 0.05,
+        "message": "Drift KS em 'tempo_emprego': statistic=0.0291, p-value=0.0300 — ALERTA: drift detectado (p < 0.05)"
+      },
+      {
+        "name": "psi_tempo_emprego",
+        "passed": true,
+        "metric_value": 0.0051,
+        "threshold": 0.25,
+        "message": "PSI de 'tempo_emprego': 0.0051 — baixo (sem mudança significativa)"
+      },
+      {
+        "name": "drift_ks_valor_emprestimo",
+        "passed": true,
+        "metric_value": 0.6609,
+        "threshold": 0.05,
+        "message": "Drift KS em 'valor_emprestimo': statistic=0.0146, p-value=0.6609"
+      },
+      {
+        "name": "psi_valor_emprestimo",
+        "passed": true,
+        "metric_value": 0.0031,
+        "threshold": 0.25,
+        "message": "PSI de 'valor_emprestimo': 0.0031 — baixo (sem mudança significativa)"
+      },
+      {
+        "name": "missing_rate_idade",
+        "passed": false,
+        "metric_value": 0.019,
+        "threshold": 0.01,
+        "message": "Missing rate em 'idade': 1.90% > SLO de 1% — ALERTA: qualidade de dados abaixo do SLO!"
+      },
+      {
+        "name": "missing_rate_renda_mensal",
+        "passed": false,
+        "metric_value": 0.0188,
+        "threshold": 0.01,
+        "message": "Missing rate em 'renda_mensal': 1.88% > SLO de 1% — ALERTA: qualidade de dados abaixo do SLO!"
+      },
+      {
+        "name": "missing_rate_score_credito",
+        "passed": false,
+        "metric_value": 0.019,
+        "threshold": 0.01,
+        "message": "Missing rate em 'score_credito': 1.90% > SLO de 1% — ALERTA: qualidade de dados abaixo do SLO!"
+      },
+      {
+        "name": "missing_rate_tempo_emprego",
+        "passed": false,
+        "metric_value": 0.0214,
+        "threshold": 0.01,
+        "message": "Missing rate em 'tempo_emprego': 2.14% > SLO de 1% — ALERTA: qualidade de dados abaixo do SLO!"
+      },
+      {
+        "name": "missing_rate_valor_emprestimo",
+        "passed": true,
+        "metric_value": 0.0,
+        "threshold": 0.01,
+        "message": "Missing rate em 'valor_emprestimo': 0.00% ≤ SLO de 1%"
+      },
+      {
+        "name": "missing_rate_taxa_utilizacao_credito",
+        "passed": true,
+        "metric_value": 0.0,
+        "threshold": 0.01,
+        "message": "Missing rate em 'taxa_utilizacao_credito': 0.00% ≤ SLO de 1%"
+      },
+      {
+        "name": "missing_rate_num_parcelas",
+        "passed": true,
+        "metric_value": 0.0,
+        "threshold": 0.01,
+        "message": "Missing rate em 'num_parcelas': 0.00% ≤ SLO de 1%"
+      },
+      {
+        "name": "missing_rate_historico_atrasos",
+        "passed": true,
+        "metric_value": 0.0,
+        "threshold": 0.01,
+        "message": "Missing rate em 'historico_atrasos': 0.00% ≤ SLO de 1%"
+      },
+      {
+        "name": "missing_rate_saldo_conta",
+        "passed": false,
+        "metric_value": 0.019,
+        "threshold": 0.01,
+        "message": "Missing rate em 'saldo_conta': 1.90% > SLO de 1% — ALERTA: qualidade de dados abaixo do SLO!"
+      },
+      {
+        "name": "missing_rate_qtd_dependentes",
+        "passed": true,
+        "metric_value": 0.0,
+        "threshold": 0.01,
+        "message": "Missing rate em 'qtd_dependentes': 0.00% ≤ SLO de 1%"
+      },
+      {
+        "name": "missing_rate_is_production",
+        "passed": true,
+        "metric_value": 0.0,
+        "threshold": 0.01,
+        "message": "Missing rate em 'is_production': 0.00% ≤ SLO de 1%"
+      },
+      {
+        "name": "missing_rate_target",
+        "passed": true,
+        "metric_value": 0.0,
+        "threshold": 0.01,
+        "message": "Missing rate em 'target': 0.00% ≤ SLO de 1%"
+      }
+    ]
+  }
+}
